@@ -2,7 +2,7 @@ from flask import Flask, render_template, redirect, request, make_response, sess
 from assets.data import db_session
 from assets.data.users import User
 from assets.data.news import News
-import assets.templates
+from templates import *
 from assets.forms.user import RegisterForm, LoginForm
 from assets.forms.news import NewsForm
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user

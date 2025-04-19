@@ -1,3 +1,3 @@
-from assets.data import users
-from assets.data import news
-from assets.data import category
+from . import users
+from . import news
+from . import category
