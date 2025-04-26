@@ -31,11 +31,17 @@
         {% else %}
             <p>
                 <a class="btn btn-primary " href="/register">Зарегистрироваться</a>
-                <a class="btn btn-success" href="/login">Войти</a>
+                <a class="btn btn-danger" href="/login">Войти</a>
             </p>
         {% endif %}
     </nav>
 </header>
+<style>
+	body {
+   	   background: #fff294;
+	   color: #4bbd0c;
+   }
+</style>
 <!-- Begin page content -->
 <main role="main" class="container">
     {% block content %}{% endblock %}
