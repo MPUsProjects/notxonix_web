@@ -2,7 +2,6 @@ from flask import Flask, render_template, redirect, request, make_response, sess
 from assets.data import db_session
 from assets.data.users import User
 from assets.data.news import News
-from templates import *
 from assets.forms.user import RegisterForm, LoginForm
 from assets.forms.news import NewsForm
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
@@ -21,19 +20,11 @@ def load_user(user_id):
 def main():
     db_session.global_init("assets/db/blogs.db")
     db_sess = db_session.create_session()
-    '''user52 = User()
-    user52.name = "Пользователь 520"
-    user52.about = "i am iron mann"
-    user52.email = "tonystarnnk@email.ru"
-    db_sess.add(user52)
-    db_sess.commit()'''
-
     user = db_sess.query(User).filter(User.id == 4).first()
     news = News(title="Личная запись", content="Эта запись личная",
                 is_private=True)
     user.news.append(news)
     db_sess.commit()
-
     app.run()
 
 
