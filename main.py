@@ -10,13 +10,14 @@ app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-
+# загрузка пользователя из бд
 @login_manager.user_loader
 def load_user(user_id):
     db_sess = db_session.create_session()
     return db_sess.query(User).get(user_id)
 
 
+# загрузка новостей
 def main():
     db_session.global_init("assets/db/blogs.db")
     db_sess = db_session.create_session()
@@ -28,6 +29,7 @@ def main():
     app.run()
 
 
+# ответвление для создания новостей
 @app.route("/")
 def index():
     db_sess = db_session.create_session()
@@ -40,6 +42,7 @@ def index():
     return render_template("index.html", news=news)
 
 
+# вкладка регистрации
 @app.route('/register', methods=['GET', 'POST'])
 def reqister():
     form = RegisterForm()
@@ -65,6 +68,7 @@ def reqister():
     return render_template('register.html', title='Регистрация', form=form)
 
 
+# проверка куки, отдельная вкладка на кол-во раз
 @app.route("/cookie_test")
 def cookie_test():
     visits_count = int(request.cookies.get("visits_count", 0))
@@ -81,6 +85,7 @@ def cookie_test():
     return res
 
 
+# тест сессии
 @app.route("/session_test")
 def session_test():
     visits_count = session.get('visits_count', 0)
@@ -89,6 +94,7 @@ def session_test():
         f"Вы пришли на эту страницу {visits_count + 1} раз")
 
 
+# вкладка входа в аккаунт
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -104,6 +110,7 @@ def login():
     return render_template('login.html', title='Авторизация', form=form)
 
 
+# активация выхода из аккаунта
 @app.route('/logout')
 @login_required
 def logout():
@@ -111,6 +118,7 @@ def logout():
     return redirect("/")
 
 
+# добавление новости
 @app.route('/news',  methods=['GET', 'POST'])
 @login_required
 def add_news():
@@ -129,6 +137,7 @@ def add_news():
                            form=form)
 
 
+# изменение конкретной новости
 @app.route('/news/<int:id>', methods=['GET', 'POST'])
 @login_required
 def edit_news(id):
@@ -163,6 +172,7 @@ def edit_news(id):
                            )
 
 
+# удаление конкретной новости
 @app.route('/news_delete/<int:id>', methods=['GET', 'POST'])
 @login_required
 def news_delete(id):
