@@ -1,12 +1,17 @@
-from flask import Flask, render_template, redirect, request, make_response, session, abort
+from flask import Flask, render_template, redirect, request, make_response, session, abort, jsonify
 from assets.data import db_session
 from assets.data.users import User
 from assets.data.news import News
 from assets.forms.user import RegisterForm, LoginForm
 from assets.forms.news import NewsForm
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+from flask_restful import reqparse, Api, Resource
+from flask_restful import abort as rest_abort
+
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
+api = Api(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -43,9 +48,19 @@ def index():
     return render_template("index.html", news=news)
 
 
+@app.errorhandler(404)
+def er404(error):
+    return make_response(jsonify({'error': 'Not found'}), 404)
+
+
+@app.errorhandler(400)
+def bad_request(_):
+    return make_response(jsonify({'error': 'Bad Request'}), 400)
+
+
 # вкладка регистрации
 @app.route('/register', methods=['GET', 'POST'])
-def reqister():
+def register():
     form = RegisterForm()
     if form.validate_on_submit():
         if form.password.data != form.password_again.data:
