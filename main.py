@@ -7,6 +7,7 @@ from assets.forms.news import NewsForm
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_restful import reqparse, Api, Resource
 from flask_restful import abort as rest_abort
+import datetime
 
 
 app = Flask(__name__)
@@ -14,6 +15,14 @@ app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 api = Api(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
+night = False
+day = False
+# проверка времени
+timenow = datetime.datetime.now().hour
+if timenow >= 21 or timenow < 7:
+    night = True
+else:
+    day = True
 
 
 # загрузка пользователя из бд
@@ -45,7 +54,10 @@ def index():
             (News.user == current_user) | (News.is_private != True))
     else:
         news = db_sess.query(News).filter(News.is_private != True)
-    return render_template("index.html", news=news)
+    if day:
+        return render_template("index_day.html", news=news)
+    else:
+        return render_template("index_night.html", news=news)
 
 
 @app.errorhandler(404)
@@ -64,14 +76,24 @@ def register():
     form = RegisterForm()
     if form.validate_on_submit():
         if form.password.data != form.password_again.data:
-            return render_template('register.html', title='Регистрация',
-                                   form=form,
-                                   message="Пароли не совпадают")
+            if day:
+                return render_template('register_day.html', title='Регистрация',
+                                        form=form,
+                                        message="Пароли не совпадают")
+            elif night:
+                return render_template('register_night.html', title='Регистрация',
+                                        form=form,
+                                        message="Пароли не совпадают")
         db_sess = db_session.create_session()
         if db_sess.query(User).filter(User.email == form.email.data).first():
-            return render_template('register.html', title='Регистрация',
-                                   form=form,
-                                   message="Такой пользователь уже есть")
+            if day:
+                return render_template('register_day.html', title='Регистрация',
+                                        form=form,
+                                        message="Такой пользователь уже есть")
+            elif night:
+                return render_template('register_night.html', title='Регистрация',
+                                       form=form,
+                                       message="Такой пользователь уже есть")
         user = User(
             name=form.name.data,
             email=form.email.data,
@@ -81,7 +103,10 @@ def register():
         db_sess.add(user)
         db_sess.commit()
         return redirect('/login')
-    return render_template('register.html', title='Регистрация', form=form)
+    if day:
+        return render_template('register_day.html', title='Регистрация', form=form)
+    elif night:
+        return render_template('register_night.html', title='Регистрация', form=form)
 
 
 # проверка куки, отдельная вкладка на кол-во раз
@@ -120,10 +145,18 @@ def login():
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             return redirect("/")
-        return render_template('login.html',
-                               message="Неправильный логин или пароль",
-                               form=form)
-    return render_template('login.html', title='Авторизация', form=form)
+        if day:
+            return render_template('login_day.html',
+                                    message="Неправильный логин или пароль",
+                                    form=form)
+        elif night:
+            return render_template('login_night.html',
+                                    message="Неправильный логин или пароль",
+                                    form=form)
+    if day:
+        return render_template('login_day.html', title='Авторизация', form=form)
+    elif night:
+        return render_template('login_night.html', title='Авторизация', form=form)
 
 
 # активация выхода из аккаунта
@@ -149,8 +182,12 @@ def add_news():
         db_sess.merge(current_user)
         db_sess.commit()
         return redirect('/')
-    return render_template('news.html', title='Добавление новости',
-                           form=form)
+    if day:
+        return render_template('news_day.html', title='Добавление новости',
+                                form=form)
+    else:
+        return render_template('news_night.html', title='Добавление новости',
+                               form=form)
 
 
 # изменение конкретной новости
@@ -182,11 +219,16 @@ def edit_news(id):
             return redirect('/')
         else:
             abort(404)
-    return render_template('news.html',
-                           title='Редактирование новости',
-                           form=form
-                           )
-
+    if day:
+        return render_template('news_day.html',
+                                title='Редактирование новости',
+                                form=form
+                                )
+    else:
+        return render_template('news_night.html',
+                               title='Редактирование новости',
+                               form=form
+                               )
 
 # удаление конкретной новости
 @app.route('/news_delete/<int:id>', methods=['GET', 'POST'])
