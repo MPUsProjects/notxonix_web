@@ -2,11 +2,12 @@ from flask import Flask, render_template, redirect, request, make_response, sess
 from assets.data import db_session
 from assets.data.users import User
 from assets.data.news import News
+from assets.data.game_data import NotxonixData
+from assets.data import api_resources
 from assets.forms.user import RegisterForm, LoginForm
 from assets.forms.news import NewsForm
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-from flask_restful import reqparse, Api, Resource
-from flask_restful import abort as rest_abort
+from flask_restful import Api
 import datetime
 
 
@@ -34,13 +35,17 @@ def load_user(user_id):
 
 # загрузка новостей
 def main():
-    db_session.global_init("assets/db/blogs.db")
+    db_session.global_init("assets/db/data.db")
     db_sess = db_session.create_session()
     user = db_sess.query(User).filter(User.id == 4).first()
     news = News(title="Личная запись", content="Эта запись личная",
                 is_private=True)
     user.news.append(news)
     db_sess.commit()
+
+    api.add_resource(api_resources.LoginResource, '/loginapi')
+    api.add_resource(api_resources.NotxonixResource, '/api/notxonix')
+
     app.run()
 
 
@@ -59,7 +64,7 @@ def index():
     else:
         return render_template("index_night.html", news=news)
 
-
+# Ошибки
 @app.errorhandler(404)
 def er404(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
@@ -70,6 +75,15 @@ def bad_request(_):
     return make_response(jsonify({'error': 'Bad Request'}), 400)
 
 
+# API
+pass
+
+
+@app.route('/api/login', methods=['GET', 'POST'])
+def api_handler():
+    pass
+
+# Вкладки
 # вкладка регистрации
 @app.route('/register', methods=['GET', 'POST'])
 def register():
