@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, request, make_response, session, abort, jsonify
 from assets.data import db_session
-from assets.data.users import User
-from assets.data.news import News
+from assets.data.users import *
+from assets.data.news import *
 from assets.data.game_data import NotxonixData
 from assets.data import api_resources
 from assets.forms.user import RegisterForm, LoginForm
@@ -36,12 +36,6 @@ def load_user(user_id):
 # загрузка новостей
 def main():
     db_session.global_init("assets/db/data.db")
-    db_sess = db_session.create_session()
-    user = db_sess.query(User).filter(User.id == 4).first()
-    news = News(title="Личная запись", content="Эта запись личная",
-                is_private=True)
-    user.news.append(news)
-    db_sess.commit()
 
     api.add_resource(api_resources.LoginResource, '/loginapi')
     api.add_resource(api_resources.NotxonixResource, '/api/notxonix')
@@ -114,7 +108,16 @@ def register():
             about=form.about.data
         )
         user.set_password(form.password.data)
+
         db_sess.add(user)
+        db_sess.commit()
+
+        acc = db_sess.query(User).filter(User.email == form.email.data).first()
+        userident = UserIdentifier(
+            name=acc.name,
+            userid=acc.id
+        )
+        db_sess.add(userident)
         db_sess.commit()
         return redirect('/login')
     if day:

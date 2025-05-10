@@ -1,5 +1,6 @@
 from flask import jsonify
 from flask_restful import abort, Resource
+from werkzeug.security import check_password_hash
 
 from . import db_session
 from .users import *
@@ -20,8 +21,11 @@ class LoginResource(Resource):
         args = notxonix_login_parser.parse_args()
         abort_if_account_not_found(args['username'])
         session = db_session.create_session()
-        acc = session.query(User).filter(User.name == args['username']).first()
-        return jsonify(args['pwdhash'] == acc.hashed_password)
+
+        accid = session.query(UserIdentifier).get(args['username']).userid
+        acc = session.query(User).get(accid)
+        res = '1' if check_password_hash(acc.hashed_password, args['pwdhash']) else '0'
+        return jsonify(res)
 
 
 class NotxonixResource(Resource):
@@ -29,9 +33,26 @@ class NotxonixResource(Resource):
         args = notxonix_get_parser.parse_args()
         abort_if_account_not_found(args['username'])
         session = db_session.create_session()
-        acc = session.query(User).filter(User.name == args['username']).first()
-        if args['pwdhash'] == acc.hashed_password:
-            return jsonify(session.query(NotxonixData).get(acc.id))
+        id = session.query(UserIdentifier).get(args['username']).userid
+        acc = session.query(User).get(id)
+        if check_password_hash(acc.hashed_password, args['pwdhash']):
+            nxdata = session.query(NotxonixData).get(acc.id)
+            res = {
+                'LB': nxdata.LB,
+                'WB': nxdata.WB,
+                'MainB': nxdata.MainB,
+                'Money': nxdata.Money,
+                'MexB': nxdata.MexB,
+                'Skin': nxdata.Skin,
+                'ShrekB': nxdata.ShrekB,
+                'Main': nxdata.Main,
+                'Loki': nxdata.Loki,
+                'Warrior': nxdata.Warrior,
+                'Mexicanes': nxdata.Mexicanes,
+                'Shrek': nxdata.Shrek,
+                'SkinCount': nxdata.SkinCount
+            }
+            return jsonify(res)
         else:
             abort(403, message=f'Wrong password')
 
@@ -39,11 +60,12 @@ class NotxonixResource(Resource):
         args = notxonix_post_parser.parse_args()
         abort_if_account_not_found(args['username'])
         session = db_session.create_session()
-        acc = session.query(User).filter(User.name == args['username']).first()
-        if args['pwdhash'] == acc.hashed_password:
+        id = session.query(UserIdentifier).get(args['username']).userid
+        acc = session.query(User).get(id)
+        if check_password_hash(acc.hashed_password, args['pwdhash']):
             data = args['data']
             nxdata = NotxonixData(
-                logged_in=data['logged_in'],
+                user_id=id,
                 LB=data['LB'],
                 WB=data['WB'],
                 MainB=data['MainB'],

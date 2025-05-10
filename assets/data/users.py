@@ -26,3 +26,8 @@ class User(SqlAlchemyBase, UserMixin):
     def check_password(self, password):
         return check_password_hash(self.hashed_password, password)
 
+
+class UserIdentifier(SqlAlchemyBase):
+    __tablename__ = 'userids'
+    name = sqlalchemy.Column(sqlalchemy.String, nullable=False, primary_key=True, unique=True)
+    userid = sqlalchemy.Column(sqlalchemy.Integer, nullable=False, unique=True)
