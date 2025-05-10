@@ -60,7 +60,6 @@ def index():
 
 
 # Фавикон
-
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory('assets', 'favicon.ico')
