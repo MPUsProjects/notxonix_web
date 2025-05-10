@@ -76,14 +76,6 @@ def bad_request(_):
     return make_response(jsonify({'error': 'Bad Request'}), 400)
 
 
-# API
-pass
-
-
-@app.route('/api/login', methods=['GET', 'POST'])
-def api_handler():
-    pass
-
 # Вкладки
 # вкладка регистрации
 @app.route('/register', methods=['GET', 'POST'])
