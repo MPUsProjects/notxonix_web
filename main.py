@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, request, make_response, session, abort, jsonify
+from flask import Flask, render_template, redirect, request, make_response, session, abort, jsonify, send_from_directory
 from assets.data import db_session
 from assets.data.users import *
 from assets.data.news import *
@@ -57,6 +57,14 @@ def index():
         return render_template("index_day.html", news=news)
     else:
         return render_template("index_night.html", news=news)
+
+
+# Фавикон
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory('assets', 'favicon.ico')
+
 
 # Ошибки
 @app.errorhandler(404)
