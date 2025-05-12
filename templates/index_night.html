@@ -1,9 +1,9 @@
 {% extends "base_night.html" %}
 
 {% block content %}
-<h1>Записи в блоге</h1>
+<h1>Публикации игроков</h1>
 {% if current_user.is_authenticated %}
-    <a href="news" class="btn btn-secondary">Добавить новость</a>
+    <a href="news" class="btn btn-secondary">Новая публикация</a>
 {% endif %}
 {% for item in news%}
 {% if current_user.is_authenticated and current_user == item.user %}
@@ -28,7 +28,9 @@
         {{item.content}}
     </div>
     <div>
-        Автор - {{item.user.name}}, Дата написания - {{item.created_date}}
+        - {{item.user.name}}
+        <br>
+        - {{item.created_date}}
     </div>
 </div>
 {% endfor %}
